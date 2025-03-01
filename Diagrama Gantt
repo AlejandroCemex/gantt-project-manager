@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta refresh para actualización automática cada 30 segundos -->
+    <meta http-equiv="refresh" content="30">
+    <title>Gestor de Proyectos con Diagramas de Gantt - Colaborativo</title>
+    <style>
+        /* Estilos generales */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Estilos de tarjetas */
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        /* Botones */
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        
+        .btn-icon {
+            padding: 4px;
+            background: none;
+            border: none;
+        }
+        
+        .text-danger {
+            color: #ef4444;
+        }
+        
+        .text-danger:hover {
+            color: #dc2626;
+        }
+        
+        /* Forms */
+        input, select {
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        /* Layout */
+        .flex {
+            display: flex;
+        }
+        
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        
+        .space-x-2 > * + * {
+            margin-left: 8px;
+        }
+        
+        .space-y-2 > * + * {
+            margin-top: 8px;
+        }
+        
+        .gap-2 {
+            gap: 8px;
+        }
+        
+        .gap-4 {
+            gap: 16px;
+        }
+        
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: 1fr;
+        }
+        
+        .mb-1 {
+            margin-bottom: 4px;
+        }
+        
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+        
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+        
+        .mb-6 {
+            margin-bottom: 24px;
+        }
+        
+        .mr-1 {
+            margin-right: 4px;
+        }
+        
+        .mr-2 {
+            margin-right: 8px;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-sm {
+            font-size: 14px;
+        }
+        
+        .text-xs {
+            font-size: 12px;
+        }
+        
+        .text-lg {
+            font-size: 18px;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        /* Project selector */
+        .project-item {
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .project-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .project-item.active {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        
+        /* Tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 8px;
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Gantt Chart */
+        .gantt-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        .gantt-inner {
+            min-width: max-content;
+            position: relative;
+        }
+        
+        .date-header {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .date-cell {
+            width: 64px;
+            text-align: center;
+            font-size: 12px;
+            padding: 8px 4px;
+        }
+        
+        .gantt-row {
+            display: flex;
+            height: 40px;
+            border-bottom: 1px solid #e5e7eb;
+            position: relative;
+        }
+        
+        .gantt-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        .task-bar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-bar {
+            position: absolute;
+            height: 24px;
+            background-color: #fff176; /* Amarillo por defecto */
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .task-bar.progress-medium {
+            background-color: #ffa726; /* Naranja */
+        }
+        
+        .task-bar.progress-complete {
+            background-color: #66bb6a; /* Verde */
+        }
+        
+        .progress-bar {
+            height: 24px;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 6px;
+        }
+        
+        .task-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            text-shadow: 0 0 1px rgba(255,255,255,0.9);
+        }
+        
+        .task-responsible {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 12px;
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .current-date-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-left: 2px dashed #ef4444;
+            z-index: 10;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .grid-cols-5 {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .grid-cols-6 {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        /* Scroll styles */
+        .overflow-x-auto {
+            overflow-x: auto;
+        }
+        
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+        
+        .max-h-60 {
+            max-height: 240px;
+        }
+        
+        .border {
+            border: 1px solid #e5e7eb;
+        }
+        
+        .rounded {
+            border-radius: 4px;
+        }
+        
+        /* Estilos de progreso personalizado */
+        .progress-step {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+        }
+        
+        .progress-step::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+        
+        .progress-step::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+        
+        /* Estilos actualizados para la notificación */
+        #save-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: 500;
+        }
+        
+        /* Estilos para el botón de compartir */
+        .btn-share {
+            background-color: #8B5CF6;
+            color: white;
+        }
+        
+        .btn-share:hover {
+            background-color: #7C3AED;
+        }
+        
+        /* Estilos para el banner de colaboración */
+        .collaboration-banner {
+            background-color: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Sección para información sobre colaboración (actualizada) -->
+        <div class="card mb-4" id="collaboration-info">
+            <div class="card-header">
+                <h2 class="card-title">Modo Colaborativo</h2>
+            </div>
+            <div class="card-content">
+                <div class="collaboration-banner">
+                    <p class="mb-2">Este gestor de proyectos funciona en modo colaborativo. Los cambios que realices se guardarán en la URL, permitiendo compartirla con otros usuarios para trabajar en el mismo proyecto.</p>
+                    <p class="mb-2">Para compartir tu trabajo actual, haz clic en el botón "Compartir Proyecto" y envía el enlace generado a tus colaboradores.</p>
+                    <p>La página se actualiza automáticamente cada 30 segundos para mostrar los cambios realizados por otros usuarios.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="card-title">Gestor de Proyectos con Diagramas de Gantt</h2>
+            </div>
+            <div class="card-content">
+                <div class="mb-4 text-right text-sm text-gray-600" id="current-date">
+                    Fecha actual: -
+                </div>
+                <div class="flex space-x-2 mb-4">
+                    <input
+                        type="text"
+                        id="new-project-name"
+                        placeholder="Nombre del nuevo proyecto"
+                        class="border rounded flex-1"
+                    >
+                    <button 
+                        id="create-project-btn"
+                        class="btn-primary flex items-center"
+                    >
+                        <svg class="mr-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Crear Proyecto
+                    </button>
+                    
+                    <!-- Botón de compartir -->
+                    <button 
+                        id="share-btn"
+                        class="btn-primary btn-share flex items-center"
+                    >
+                        <svg class="mr-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        Compartir Proyecto
+                    </button>
+                </div>
+                
+                <div id="projects-list-container" class="mb-4" style="display: none;">
+                    <h3 class="text-lg font-semibold mb-2">Proyectos</h3>
+                    <div id="projects-list" class="flex flex-wrap gap-2">
+                        <!-- Projects will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="project-details" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title">Proyecto: <span id="current-project-name">-</span></h2>
+            </div>
+            <div class="card-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-4">
+                    <div class="form-group">
+                        <label class="text-sm font-semibold mb-1">Nombre de la tarea</label>
+                        <input
+                            type="text"
+                            id="new-task-name"
+                            class="border rounded w-full"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="text-sm font-semibold mb-1">Fecha de inicio</label>
+                        <input
+                            type="date"
+                            id="new-task-start-date"
+                            class="border rounded w-full"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="text-sm font-semibold mb-1">Duración (días)</label>
+                        <input
+                            type="number"
+                            id="new-task-duration"
+                            min="1"
+                            value="1"
+                            class="border rounded w-full"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="text-sm font-semibold mb-1">Encargado</label>
+                        <input
+                            type="text"
+                            id="new-task-responsible"
+                            placeholder="Nombre del encargado"
+                            class="border rounded w-full"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="text-sm font-semibold mb-1">Depende de</label>
+                        <select id="new-task-dependency" class="border rounded w-full">
+                            <option value="">Sin dependencia</option>
+                            <!-- Las opciones se añadirán dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <button 
+                            id="add-task-btn"
+                            class="btn-success w-full flex items-center justify-center"
+                        >
+                            <svg class="mr-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                            Añadir Tarea
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="tasks-container" style="display: none;">
+                    <h3 class="text-lg font-semibold mb-2">Información de Tareas</h3>
+                    <div class="mb-6 overflow-y-auto max-h-60 border rounded">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarea</th>
+                                    <th>Encargado</th>
+                                    <th class="text-center">Duración</th>
+                                    <th class="text-center">Fecha de Inicio</th>
+                                    <th class="text-center">Fecha de Fin</th>
+                                    <th class="text-center">Depende de</th>
+                                    <th class="text-center">Progreso</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="task-list">
+                                <!-- Tasks will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-2">Diagrama de Gantt</h3>
+                    <div class="relative">
+                        <div id="gantt-chart">
+                            <!-- Gantt chart will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Elemento para mostrar notificaciones -->
+    <div id="save-notification" style="display:none;"></div>
+    <script>
+        // Estado de la aplicación
+        const state = {
+            projects: [],
+            currentProject: null,
+            currentDate: new Date()
+        };
+        
+        // Elementos DOM
+        let elements;
+        
+        // Variable para control de cambios en URL
+        let lastURLHash = window.location.hash;
+        
+        // Inicialización cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar elementos DOM
+            elements = {
+                currentDateElement: document.getElementById('current-date'),
+                newProjectNameInput: document.getElementById('new-project-name'),
+                createProjectBtn: document.getElementById('create-project-btn'),
+                shareBtn: document.getElementById('share-btn'),
+                projectsList: document.getElementById('projects-list'),
+                projectsListContainer: document.getElementById('projects-list-container'),
+                projectDetails: document.getElementById('project-details'),
+                currentProjectName: document.getElementById('current-project-name'),
+                newTaskNameInput: document.getElementById('new-task-name'),
+                newTaskStartDateInput: document.getElementById('new-task-start-date'),
+                newTaskDurationInput: document.getElementById('new-task-duration'),
+                newTaskResponsibleInput: document.getElementById('new-task-responsible'),
+                newTaskDependencySelect: document.getElementById('new-task-dependency'),
+                addTaskBtn: document.getElementById('add-task-btn'),
+                taskList: document.getElementById('task-list'),
+                tasksContainer: document.getElementById('tasks-container'),
+                ganttChart: document.getElementById('gantt-chart'),
+                saveNotification: document.getElementById('save-notification')
+            };
+            
+            // Configurar event listeners
+            elements.createProjectBtn.addEventListener('click', createProject);
+            elements.addTaskBtn.addEventListener('click', addTask);
+            elements.shareBtn.addEventListener('click', copyShareableLink);
+            
+            // Iniciar aplicación
+            init();
+        });
+        
+        // Inicialización (actualizada)
+        function init() {
+            // Cargar proyectos desde la URL o localStorage
+            loadProjects();
+            
+            // Actualizar fecha actual
+            updateCurrentDate();
+            setInterval(updateCurrentDate, 86400000); // Actualizar cada día
+            
+            // Actualizar UI
+            renderProjects();
+            renderProjectDetails();
+            
+            // Verificar automáticamente los cambios en la URL cada 5 segundos (más frecuente)
+            setInterval(checkURLChanges, 5000);
+        }
+        // Verificar cambios en la URL (actualizada)
+        function checkURLChanges() {
+            if (window.location.hash !== lastURLHash) {
+                lastURLHash = window.location.hash;
+                
+                // Hay un cambio en la URL, recargar proyectos
+                const currentProjectId = state.currentProject ? state.currentProject.id : null;
+                
+                loadProjects();
+                
+                // Intentar mantener el proyecto seleccionado si aún existe
+                if (currentProjectId && state.projects.some(p => p.id === currentProjectId)) {
+                    state.currentProject = state.projects.find(p => p.id === currentProjectId);
+                }
+                
+                renderProjects();
+                renderProjectDetails();
+                
+                showNotification("Los datos han sido actualizados desde otro usuario");
+            }
+        }
+        
+        // Actualizar la fecha actual
+        function updateCurrentDate() {
+            state.currentDate = new Date();
+            const monthNames = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            elements.currentDateElement.textContent = `Fecha actual: ${state.currentDate.getDate()} de ${monthNames[state.currentDate.getMonth()]} de ${state.currentDate.getFullYear()}`;
+        }
+        // Cargar proyectos desde la URL o localStorage como respaldo
+        function loadProjects() {
+            try {
+                // Primero intentar cargar desde el hash de la URL
+                if (window.location.hash && window.location.hash.length > 1) {
+                    const hashData = window.location.hash.substring(1); // Eliminar el # inicial
+                    const decodedData = decodeURIComponent(hashData);
+                    const jsonData = atob(decodedData); // Descodificar Base64
+                    state.projects = JSON.parse(jsonData);
+                    
+                    if (state.projects.length > 0) {
+                        state.currentProject = state.projects[0]; // Seleccionar el primer proyecto por defecto
+                        return;
+                    }
+                }
+                
+                // Si no hay datos en la URL, intentar cargar desde localStorage como respaldo
+                const savedProjects = localStorage.getItem('ganttProjects');
+                if (savedProjects) {
+                    try {
+                        state.projects = JSON.parse(savedProjects);
+                        if (state.projects.length > 0) {
+                            state.currentProject = state.projects[0]; // Seleccionar el primer proyecto por defecto
+                        }
+                    } catch (e) {
+                        console.error('Error al cargar proyectos desde localStorage:', e);
+                        state.projects = [];
+                    }
+                }
+            } catch (e) {
+                console.error('Error al cargar proyectos:', e);
+                state.projects = [];
+            }
+        }
+
+        // Guardar proyectos en la URL y localStorage como respaldo
+        function saveProjects() {
+            if (state.projects.length > 0) {
+                try {
+                    // Guardar en localStorage como respaldo
+                    localStorage.setItem('ganttProjects', JSON.stringify(state.projects));
+                    
+                    // Guardar en el hash de la URL para compartir
+                    const jsonData = JSON.stringify(state.projects);
+                    const base64Data = btoa(jsonData); // Codificar a Base64
+                    const encodedData = encodeURIComponent(base64Data);
+                    
+                    // Actualizar la URL sin recargar la página
+                    window.history.replaceState(null, null, '#' + encodedData);
+                    lastURLHash = window.location.hash;
+                    
+                    // Mostrar notificación de que los datos fueron guardados
+                    showNotification("Los cambios se han guardado y pueden ser compartidos");
+                } catch (e) {
+                    console.error('Error al guardar proyectos:', e);
+                    alert("No se pudieron guardar los cambios. Los datos pueden ser demasiado grandes.");
+                }
+            } else {
+                localStorage.removeItem('ganttProjects');
+                window.history.replaceState(null, null, window.location.pathname);
+                lastURLHash = '';
+            }
+        }
+        // Función para mostrar notificación de cambios guardados (actualizada)
+        function showNotification(message) {
+            if (!elements.saveNotification) return;
+            
+            elements.saveNotification.textContent = message;
+            elements.saveNotification.style.display = 'block';
+            elements.saveNotification.style.opacity = '1';
+            
+            // Hacer que la notificación sea más visible cuando hay cambios de otros usuarios
+            if (message.includes("otro usuario")) {
+                elements.saveNotification.style.backgroundColor = "#3b82f6"; // Azul más llamativo
+            } else {
+                elements.saveNotification.style.backgroundColor = "#10b981"; // Verde original
+            }
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                elements.saveNotification.style.opacity = '0';
+                setTimeout(() => {
+                    elements.saveNotification.style.display = 'none';
+                }, 300);
+            }, 3000);
+        }
+        
+        // Función para copiar la URL actual al portapapeles
+        function copyShareableLink() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showNotification("¡Enlace copiado! Ahora puedes compartirlo");
+                })
+                .catch(err => {
+                    console.error('Error al copiar el enlace: ', err);
+                    alert("No se pudo copiar el enlace. Por favor, copia la URL del navegador manualmente.");
+                });
+        }
+        // Calcular la fecha de fin de una tarea
+        function calculateEndDate(startDateStr, duration) {
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + parseInt(duration) - 1); // -1 porque el día inicial cuenta
+            return endDate;
+        }
+        
+        // Formatear fecha para mostrar
+        function formatDate(dateObj) {
+            const day = dateObj.getDate();
+            const month = dateObj.getMonth();
+            const year = dateObj.getFullYear();
+            
+            const monthNames = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            
+            return `${day} de ${monthNames[month]} de ${year}`;
+        }
+        
+  // Obtener nombre de tarea por ID
+  function getTaskNameById(taskId) {
+            if (!state.currentProject) return '';
+            
+            const task = state.currentProject.tasks.find(t => t.id === taskId);
+            return task ? task.name : '';
+        }
+        // Crear un nuevo proyecto
+        function createProject() {
+            const projectName = elements.newProjectNameInput.value.trim();
+            if (!projectName) return;
+            
+            const newProject = {
+                id: Date.now().toString(),
+                name: projectName,
+                tasks: []
+            };
+            
+            state.projects.push(newProject);
+            state.currentProject = newProject;
+            
+            // Limpiar input y guardar
+            elements.newProjectNameInput.value = '';
+            saveProjects(); // Esto ahora guarda en URL y localStorage
+            
+            // Actualizar UI
+            renderProjects();
+            renderProjectDetails();
+        }
+        
+        // Renderizar lista de proyectos
+        function renderProjects() {
+            if (state.projects.length > 0) {
+                elements.projectsListContainer.style.display = 'block';
+                elements.projectsList.innerHTML = '';
+                
+                state.projects.forEach(project => {
+                    const projectElement = document.createElement('div');
+                    projectElement.className = `project-item ${state.currentProject && state.currentProject.id === project.id ? 'active' : ''}`;
+                    projectElement.innerHTML = `
+                        <span class="mr-2">${project.name}</span>
+                        <button class="btn-icon text-danger delete-project" data-id="${project.id}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
+                    `;
+                    
+                    // Evento para seleccionar proyecto
+                    projectElement.addEventListener('click', function(e) {
+                        // No activar si se hace clic en el botón de eliminar
+                        if (e.target.closest('.delete-project')) return;
+                        
+                        state.currentProject = project;
+                        renderProjects();
+                        renderProjectDetails();
+                    });
+                    
+                    // Evento para eliminar proyecto
+                    const deleteBtn = projectElement.querySelector('.delete-project');
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        deleteProject(project.id);
+                    });
+                    
+                    elements.projectsList.appendChild(projectElement);
+                });
+            } else {
+                elements.projectsListContainer.style.display = 'none';
+            }
+        }
+        
+        // Renderizar detalles del proyecto actual
+        function renderProjectDetails() {
+            if (state.currentProject) {
+                elements.projectDetails.style.display = 'block';
+                elements.currentProjectName.textContent = state.currentProject.name;
+                
+                // Actualizar el select de dependencias
+                updateDependencySelect();
+                
+                renderTasks();
+                renderGantt();
+            } else {
+                elements.projectDetails.style.display = 'none';
+            }
+        }
+        
+        // Actualizar select de dependencias
+        function updateDependencySelect() {
+            if (!state.currentProject) return;
+            
+            elements.newTaskDependencySelect.innerHTML = '<option value="">Sin dependencia</option>';
+            
+            state.currentProject.tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = task.name;
+                elements.newTaskDependencySelect.appendChild(option);
+            });
+        }
+        
+        // Eliminar un proyecto
+        function deleteProject(projectId) {
+            state.projects = state.projects.filter(project => project.id !== projectId);
+            
+            if (state.currentProject && state.currentProject.id === projectId) {
+                state.currentProject = state.projects.length > 0 ? state.projects[0] : null;
+            }
+            
+            // Guardar y actualizar UI
+            saveProjects();
+            renderProjects();
+            renderProjectDetails();
+        }
+        // Añadir una nueva tarea
+        function addTask() {
+            if (!state.currentProject) return;
+            
+            const taskName = elements.newTaskNameInput.value.trim();
+            const startDate = elements.newTaskStartDateInput.value;
+            const duration = parseInt(elements.newTaskDurationInput.value);
+            const responsible = elements.newTaskResponsibleInput.value.trim();
+            const dependencyId = elements.newTaskDependencySelect.value;
+            
+            if (!taskName || !startDate || isNaN(duration) || duration < 1) {
+                alert("Por favor, complete todos los campos requeridos correctamente.");
+                return;
+            }
+            
+            const newTask = {
+                id: Date.now().toString(),
+                name: taskName,
+                startDate: startDate,
+                duration: duration,
+                responsible: responsible,
+                dependencyId: dependencyId || null,
+                progress: 0
+            };
+            
+            // Añadir tarea al proyecto actual
+            state.currentProject.tasks.push(newTask);
+            
+            // Limpiar formulario
+            elements.newTaskNameInput.value = '';
+            elements.newTaskStartDateInput.value = '';
+            elements.newTaskDurationInput.value = '1';
+            elements.newTaskResponsibleInput.value = '';
+            elements.newTaskDependencySelect.value = '';
+            
+            // Guardar y actualizar UI
+            saveProjects();
+            updateDependencySelect();
+            renderTasks();
+            renderGantt();
+        }
+        
+        // Actualizar el progreso de una tarea
+        function updateTaskProgress(taskId, progressValue) {
+            if (!state.currentProject) return;
+            
+            // Redondear el progreso a incrementos de 10%
+            const progress = Math.round(progressValue * 10) / 10;
+            
+            state.currentProject.tasks = state.currentProject.tasks.map(task => 
+                task.id === taskId 
+                    ? {...task, progress: Math.min(1, Math.max(0, progress))} 
+                    : task
+            );
+            
+            // Guardar y actualizar UI
+            saveProjects();
+            renderTasks();
+            renderGantt();
+        }
+        
+        // Renderizar lista de tareas
+        function renderTasks() {
+            if (state.currentProject && state.currentProject.tasks.length > 0) {
+                elements.tasksContainer.style.display = 'block';
+                elements.taskList.innerHTML = '';
+                
+                state.currentProject.tasks.forEach(task => {
+                    const row = document.createElement('tr');
+                    const dependencyName = task.dependencyId ? getTaskNameById(task.dependencyId) : '-';
+                    
+                    row.innerHTML = `
+                        <td>${task.name}</td>
+                        <td>${task.responsible || '-'}</td>
+                        <td class="text-center">${task.duration} ${task.duration === 1 ? 'día' : 'días'}</td>
+                        <td class="text-center text-sm">${formatDate(new Date(task.startDate))}</td>
+                        <td class="text-center text-sm">${formatDate(calculateEndDate(task.startDate, task.duration))}</td>
+                        <td class="text-center">${dependencyName}</td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="100" 
+                                    step="10"
+                                    value="${(task.progress || 0) * 100}" 
+                                    class="progress-step task-progress" 
+                                    data-id="${task.id}"
+                                >
+                                <span class="text-xs">${Math.round((task.progress || 0) * 100)}%</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn-icon text-danger delete-task" data-id="${task.id}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </td>
+                    `;
+                    
+                    // Evento para actualizar progreso
+                    const progressInput = row.querySelector('.task-progress');
+                    progressInput.addEventListener('input', function(e) {
+                        updateTaskProgress(task.id, parseInt(e.target.value) / 100);
+                    });
+                    
+                    // Evento para eliminar tarea
+                    const deleteBtn = row.querySelector('.delete-task');
+                    deleteBtn.addEventListener('click', function() {
+                        deleteTask(task.id);
+                    });
+                    
+                    elements.taskList.appendChild(row);
+                });
+            } else {
+                elements.tasksContainer.style.display = 'none';
+            }
+        }
+        
+        // Eliminar una tarea
+        function deleteTask(taskId) {
+            if (!state.currentProject) return;
+            
+            // Verificar si hay tareas que dependen de esta
+            const dependentTasks = state.currentProject.tasks.filter(task => task.dependencyId === taskId);
+            
+            if (dependentTasks.length > 0) {
+                const taskNames = dependentTasks.map(task => task.name).join(", ");
+                alert(`No se puede eliminar esta tarea porque hay tareas que dependen de ella: ${taskNames}`);
+                return;
+            }
+            
+            state.currentProject.tasks = state.currentProject.tasks.filter(task => task.id !== taskId);
+            
+            // Guardar y actualizar UI
+            saveProjects();
+            updateDependencySelect();
+            renderTasks();
+            renderGantt();
+        }
+        // Renderizar diagrama de Gantt
+        function renderGantt() {
+            if (!state.currentProject || state.currentProject.tasks.length === 0) {
+                elements.ganttChart.innerHTML = `
+                    <div class="p-4 text-center text-gray-600">
+                        No hay tareas para mostrar. Agregue tareas para visualizar el diagrama de Gantt.
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                // Ordenar tareas por fecha de inicio
+                const sortedTasks = [...state.currentProject.tasks].sort((a, b) => 
+                    new Date(a.startDate) - new Date(b.startDate)
+                );
+                
+                // Encontrar la fecha más temprana
+                const startDate = new Date(sortedTasks[0].startDate);
+                
+                // Calcular la fecha final considerando la duración de cada tarea
+                const endDates = sortedTasks.map(task => {
+                    const taskStart = new Date(task.startDate);
+                    const taskEnd = new Date(taskStart);
+                    taskEnd.setDate(taskStart.getDate() + parseInt(task.duration) - 1);
+                    return taskEnd;
+                });
+                
+                const endDate = new Date(Math.max(...endDates.map(date => date.getTime())));
+                
+                // Calcular días totales del proyecto
+                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                
+                // Calcular la posición de la línea de fecha actual
+                const today = state.currentDate;
+                let currentDatePosition = -1;
+                let isCurrentDateVisible = false;
+                
+                if (today >= startDate && today <= endDate) {
+                    // Calcular días desde el inicio
+                    const daysDiff = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+                    // Posicionar
+                    currentDatePosition = daysDiff * 64;
+                    isCurrentDateVisible = true;
+                }
+                
+                // Generar HTML del diagrama
+                let ganttHTML = `
+                    <div class="gantt-container">
+                        <div class="gantt-inner">
+                            <div class="date-header">
+                `;
+                
+                // Generar cabecera de fechas
+                for (let i = 0; i < totalDays; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(date.getDate() + i);
+                    const monthNames = [
+                        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                    ];
+                    
+                    ganttHTML += `
+                        <div class="date-cell">${date.getDate()} ${monthNames[date.getMonth()].substring(0, 3)}</div>
+                    `;
+                }
+                
+                ganttHTML += `
+                            </div>
+                `;
+                
+                // Línea de fecha actual
+                if (isCurrentDateVisible) {
+                    ganttHTML += `
+                        <div class="current-date-line" style="left: ${currentDatePosition}px;"></div>
+                    `;
+                }
+                
+                // Generar filas de tareas
+                sortedTasks.forEach(task => {
+                    const taskStart = new Date(task.startDate);
+                    const daysFromStart = Math.ceil((taskStart - startDate) / (1000 * 60 * 60 * 24));
+                    
+                    // Determinar clase de color según el progreso
+                    let progressClass = '';
+                    if (task.progress === 1) {
+                        progressClass = 'progress-complete';  // Verde (100%)
+                    } else if (task.progress > 0.5) {
+                        progressClass = 'progress-medium';    // Naranja (50-90%)
+                    }
+                    // Por defecto es amarillo (<=50%)
+                    
+                    ganttHTML += `
+                        <div class="gantt-row">
+                            <div class="task-bar-container">
+                                <div class="task-bar ${progressClass}" style="left: ${daysFromStart * 64}px; width: ${task.duration * 64}px;">
+                                    <div class="progress-bar" style="width: ${(task.progress || 0) * 100}%;"></div>
+                                    <div class="task-label">${Math.round((task.progress || 0) * 100)}%</div>
+                                    <div class="task-responsible">${task.responsible || ''}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                ganttHTML += `
+                        </div>
+                    </div>
+                `;
+                
+                elements.ganttChart.innerHTML = ganttHTML;
+                
+            } catch (error) {
+                console.error('Error al renderizar el diagrama de Gantt:', error);
+                elements.ganttChart.innerHTML = `
+                    <div class="p-4 text-center text-gray-600">
+                        Error al renderizar el diagrama. Compruebe que las fechas de las tareas son válidas.
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
